@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>NKY Storage Editor</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div id="unsupported" class="unsupported" style="display:none;">
+    此页面不受支持，请在 neikongyi.com 及其子域名页面使用本插件。
+  </div>
+
+  <main id="main" style="display:none;">
+    <header class="header">
+      <div class="header-copy">
+        <h1>nky-storage-editer</h1>
+        <p class="header-subtitle">Live editor for current page data</p>
+      </div>
+      <div class="header-actions">
+        <div id="host" class="host"></div>
+        <button id="btn-reload" type="button">重读</button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="sidebar">
+        <div class="store-tabs">
+          <button id="tab-localStorage" class="store-tab active" type="button" data-store="localStorage">localStorage</button>
+          <button id="tab-sessionStorage" class="store-tab" type="button" data-store="sessionStorage">sessionStorage</button>
+        </div>
+
+        <div class="sidebar-tools">
+          <input id="store-search" class="search-input" type="search" placeholder="查找 key / value" spellcheck="false" />
+          <div class="sidebar-meta">
+            <span id="store-count" class="count"></span>
+            <button id="btn-add-current" type="button">新增</button>
+          </div>
+        </div>
+
+        <div id="store-list" class="key-list"></div>
+        <div id="store-empty" class="empty-state">当前 Storage 为空</div>
+      </aside>
+
+      <section class="editor">
+        <div id="editor-empty" class="editor-empty">选择左侧某个 key 后编辑</div>
+
+        <div id="editor-form" style="display:none;">
+          <div class="editor-meta">
+            <div class="meta-left">
+              <span id="editor-store-badge"></span>
+              <span id="editor-value-type" class="value-type"></span>
+            </div>
+            <div class="meta-actions">
+              <button id="btn-format-json" type="button" style="display:none;">格式化</button>
+              <button id="btn-delete-current" class="danger" type="button">删除</button>
+            </div>
+          </div>
+
+          <label class="editor-field key-field">
+            <span>Key</span>
+            <input id="editor-key" class="editor-key" type="text" spellcheck="false" />
+          </label>
+
+          <div id="json-editor" class="json-editor" style="display:none;">
+            <div class="json-toolbar">
+              <span class="json-hint">JSON 树编辑</span>
+              <div class="json-toolbar-actions">
+                <button id="btn-expand-all" type="button">全部展开</button>
+                <button id="btn-collapse-all" type="button">折叠到首层</button>
+              </div>
+            </div>
+            <div id="json-tree" class="json-tree"></div>
+          </div>
+
+          <label id="text-editor" class="editor-field value-field" style="display:none;">
+            <span>Value</span>
+            <textarea id="editor-value" class="editor-value" spellcheck="false"></textarea>
+          </label>
+        </div>
+      </section>
+    </div>
+
+    <footer class="actions">
+      <div class="footer-shortcuts">
+        <button id="btn-toggle-f27" class="btn-shortcut">业务指引切换</button>
+        <button id="btn-toggle-is-need-tips" class="btn-shortcut">isNeedTips</button>
+      </div>
+      <button id="btn-save" class="primary" type="button">保存到页面</button>
+      <label class="reload-option">
+        <input id="reload-after-save" type="checkbox" />
+        保存后刷新页面
+      </label>
+    </footer>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>
