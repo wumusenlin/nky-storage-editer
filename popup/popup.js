@@ -3,13 +3,17 @@
 let currentTabId = null;
 let currentHostname = null;
 let isContentScriptReady = false;
-let activeStoreName = 'localStorage';
+let activeStoreName = 'sessionStorage';
 let selected = null;
 let jsonDraft = null;
 let jsonExpandState = {};
 let snapshot = {
   localStorage: {},
   sessionStorage: {}
+};
+const STORE_THEME = {
+  localStorage: 'local',
+  sessionStorage: 'session'
 };
 
 function escapeHtml(str) {
@@ -41,10 +45,12 @@ function setStatus(message, type = '') {
 
 function showUnsupported(message) {
   const unsupported = document.getElementById('unsupported');
-  const main = document.getElementById('main');
+  const mainSections = document.querySelectorAll('.header, .workspace, .actions');
   unsupported.textContent = message || '此页面不受支持，请在 neikongyi.com 及其子域名页面使用本插件。';
   unsupported.style.display = 'block';
-  main.style.display = 'none';
+  mainSections.forEach((node) => {
+    node.style.display = 'none';
+  });
 }
 
 function sendPageMessage(message, callback, didInject = false) {
@@ -119,18 +125,18 @@ function readCurrentStorage() {
       sessionStorage: normalizeStore(response.sessionStorage)
     };
     selected = pickInitialSelection();
-    activeStoreName = selected?.storeName || 'localStorage';
+    activeStoreName = selected?.storeName || 'sessionStorage';
     resetJsonEditorState();
     renderAll();
   });
 }
 
 function pickInitialSelection() {
-  const localKey = Object.keys(snapshot.localStorage).sort()[0];
-  if (localKey) return { storeName: 'localStorage', key: localKey };
-
   const sessionKey = Object.keys(snapshot.sessionStorage).sort()[0];
   if (sessionKey) return { storeName: 'sessionStorage', key: sessionKey };
+
+  const localKey = Object.keys(snapshot.localStorage).sort()[0];
+  if (localKey) return { storeName: 'localStorage', key: localKey };
 
   return null;
 }
@@ -142,6 +148,7 @@ function renderAll() {
 }
 
 function renderTabs() {
+  document.body.dataset.activeStore = STORE_THEME[activeStoreName] || 'local';
   document.querySelectorAll('.store-tab').forEach((button) => {
     button.classList.toggle('active', button.dataset.store === activeStoreName);
   });
@@ -176,7 +183,6 @@ function renderKeyList() {
           <span class="key-name">${escapeHtml(key)}</span>
           <span class="key-type">${escapeHtml(getTypeLabel(value))}</span>
         </span>
-        <span class="key-preview">${escapeHtml(value.slice(0, 96))}</span>
       </button>
     `;
   }).join('');
@@ -335,7 +341,13 @@ function renderJsonBranch(path, label, value, depth, isRoot = false) {
   return `
     <div class="json-node">
       <div class="json-row json-branch" style="padding-left:${depth * 18}px">
-        <button class="json-toggle" type="button" data-path="${escapeHtml(path)}">${expanded ? '▾' : '▸'}</button>
+        <button
+          class="json-toggle"
+          type="button"
+          data-path="${escapeHtml(path)}"
+          title="${expanded ? '收起当前节点' : '展开当前节点'}"
+          aria-label="${expanded ? '收起当前节点' : '展开当前节点'}"
+        >${expanded ? '▾' : '▸'}</button>
         <span class="json-label">${escapeHtml(isRoot ? summary : label)}</span>
         <span class="json-summary">${escapeHtml(summary)}</span>
       </div>
@@ -567,7 +579,9 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('unsupported').style.display = 'none';
-    document.getElementById('main').style.display = 'block';
+    document.querySelector('.header').style.display = 'flex';
+    document.querySelector('.workspace').style.display = 'flex';
+    document.querySelector('.actions').style.display = 'flex';
     document.getElementById('host').textContent = currentHostname;
     readCurrentStorage();
   });
